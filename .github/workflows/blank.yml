@@ -65,21 +65,18 @@ jobs:
       run: |
         cd ~/aosp-llvm/toolchain/llvm_android
 
-        cp $GITHUB_WORKSPACE/llvm-arm64-fix.patch .
+        cp $GITHUB_WORKSPACE/patches/llvm-arm64-fix.patch .
 
         git apply llvm-arm64-fix.patch || true
 
     - name: Build LLVM
       run: |
-        cd ~/aosp-llvm/toolchain/llvm_android
+        cd ~/aosp-llvm
 
-        chmod +x build.py
-
-        ./build.py \
-          --skip-tests \
-          --no-musl \
+        python3 toolchain/llvm_android/build.py \
           --no-build windows \
-          -j$(nproc)
+          --skip-tests \
+          --no-musl
 
     - name: Pack output
       run: |
