@@ -42,6 +42,25 @@ jobs:
 
         repo sync -c -j$(nproc)
 
+    - name: Setup ARM64 prebuilts
+      run: |
+        cd ~/aosp-llvm
+
+        mkdir -p prebuilts/build-tools/linux-arm64/bin
+
+        ln -sf /usr/bin/ninja prebuilts/build-tools/linux-arm64/bin/ninja
+        ln -sf /usr/bin/bison prebuilts/build-tools/linux-arm64/bin/bison
+        ln -sf /usr/bin/make prebuilts/build-tools/linux-arm64/bin/make
+
+        mkdir -p prebuilts/clang/host
+        ln -sfn /usr prebuilts/clang/host/linux-arm64
+
+        mkdir -p prebuilts/cmake
+        ln -sfn /usr prebuilts/cmake/linux-arm64
+
+        mkdir -p prebuilts/python
+        ln -sfn /usr prebuilts/python/linux-arm64
+
     - name: Apply ARM64 patch
       run: |
         cd ~/aosp-llvm/toolchain/llvm_android
