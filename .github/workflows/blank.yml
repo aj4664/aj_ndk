@@ -48,14 +48,14 @@ jobs:
         print(platform.machine())
         EOF
         
-    - name: Cache AOSP repo
+    - name: Cache AOSP LLVM
       uses: actions/cache@v4
       with:
         path: |
-          ~/aosp-llvm/.repo
-        key: aosp-llvm-repo-arm64-v1
+          ~/aosp-llvm
+        key: aosp-llvm-${{ runner.arch }}-v1
         restore-keys: |
-          aosp-llvm-repo-arm64-
+          aosp-llvm-${{ runner.arch }}-
 
     - name: Sync AOSP LLVM
       run: |
