@@ -78,6 +78,21 @@ index c2f17aa..52c682b 100644
  
      @property
      def cflags(self) -> List[str]:
+diff --git a/src/llvm_android/hosts.py b/src/llvm_android/hosts.py
+index 113cfe3..268dafe 100644
+--- a/src/llvm_android/hosts.py
++++ b/src/llvm_android/hosts.py
+@@ -99,8 +99,8 @@ class Arch(enum.Enum):
+         return {
+             Arch.AARCH64: 'arm64',
+             Arch.ARM:  'arm',
+-            Arch.X86_64: 'x86',
+-            Arch.I386: 'x86',
++            Arch.X86_64: 'arm64',
++            Arch.I386: 'arm64',
+         }[self]
+ 
+ 
 diff --git a/src/llvm_android/paths.py b/src/llvm_android/paths.py
 index 1c75402..c173dbf 100644
 --- a/src/llvm_android/paths.py
