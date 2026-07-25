@@ -40,7 +40,7 @@ jobs:
           -u https://android.googlesource.com/platform/manifest \
           -b llvm-toolchain
 
-        repo sync -c -j$(nproc)
+        repo sync -c -j$(nproc) --progress -v
 
     - name: Setup ARM64 prebuilts
       run: |
