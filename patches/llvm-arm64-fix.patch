@@ -54,7 +54,7 @@ index a42978e..cafd3db 100644
          if self.build_instrumented:
              defines['LLVM_BUILD_INSTRUMENTED'] = 'ON'
 diff --git a/src/llvm_android/configs.py b/src/llvm_android/configs.py
-index c2f17aa..52c682b 100644
+index c2f17aa..ffe054b 100644
 --- a/src/llvm_android/configs.py
 +++ b/src/llvm_android/configs.py
 @@ -292,16 +292,16 @@ class LinuxConfig(_GccConfig):
@@ -74,10 +74,30 @@ index c2f17aa..52c682b 100644
      @property
      def llvm_triple(self) -> str:
 -        return 'i386-unknown-linux-gnu' if self.is_32_bit else 'x86_64-unknown-linux-gnu'
-+        return 'i386-unknown-linux-gnu' if self.is_32_bit else 'aarch64-unknown-linux-gnu'
++        return 'aarch64-unknown-linux-gnu'
  
      @property
      def cflags(self) -> List[str]:
+@@ -741,11 +741,7 @@ def android_configs(platform: bool=True,
+                     extra_config=None) -> List[Config]:
+     """Returns a list of configs for android builds."""
+     configs = [
+-        AndroidARMConfig(),
+         AndroidAArch64Config(),
+-        AndroidI386Config(),
+-        AndroidX64Config(),
+-        AndroidRiscv64Config(),
+     ]
+     for config in configs:
+         config.static = static
+@@ -772,7 +768,6 @@ def android_ndk_tsan_configs() -> List[Config]:
+     """Returns a list of configs for android builds."""
+     configs = [
+         AndroidAArch64Config(),
+-        AndroidX64Config(),
+     ]
+     for config in configs:
+         config.override_api_level = 24
 diff --git a/src/llvm_android/paths.py b/src/llvm_android/paths.py
 index 1c75402..dbf7cee 100644
 --- a/src/llvm_android/paths.py
