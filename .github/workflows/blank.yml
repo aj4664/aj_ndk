@@ -30,17 +30,31 @@ jobs:
         import platform
         print(platform.machine())
         EOF
+        
+    - name: Cache AOSP repo
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/aosp-llvm/.repo
+        key: aosp-llvm-${{ runner.arch }}-v1
+        restore-keys: |
+          aosp-llvm-${{ runner.arch }}-
+
 
     - name: Sync AOSP LLVM
       run: |
-        mkdir ~/aosp-llvm
+        mkdir -p ~/aosp-llvm
         cd ~/aosp-llvm
 
         repo init \
           -u https://android.googlesource.com/platform/manifest \
           -b llvm-toolchain
 
-        repo sync -c -j$(nproc)
+        repo sync \
+          -c \
+          -j$(nproc) \
+          --force-sync \
+          --no-clone-bundle
 
     - name: Setup ARM64 prebuilts
       run: |
@@ -67,7 +81,9 @@ jobs:
 
         cp $GITHUB_WORKSPACE/patches/llvm-arm64-fix.patch .
 
-        git apply llvm-arm64-fix.patch || true
+        git apply llvm-arm64-fix.patch
+
+        echo "ARM64 patch applied"
 
     - name: Build LLVM
       run: |
