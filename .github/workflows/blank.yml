@@ -38,10 +38,9 @@ jobs:
       with:
         path: |
           ~/aosp-llvm/.repo
-        key: aosp-llvm-${{ runner.arch }}-v1
+        key: aosp-llvm-repo-arm64-v1
         restore-keys: |
-          aosp-llvm-${{ runner.arch }}-
-
+          aosp-llvm-repo-arm64-
 
     - name: Sync AOSP LLVM
       run: |
