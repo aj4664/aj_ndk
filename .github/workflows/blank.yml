@@ -32,8 +32,6 @@ jobs:
         EOF
 
     - name: Sync AOSP LLVM
-      env:
-        PYTHONUNBUFFERED: 1
       run: |
         mkdir ~/aosp-llvm
         cd ~/aosp-llvm
@@ -42,7 +40,28 @@ jobs:
           -u https://android.googlesource.com/platform/manifest \
           -b llvm-toolchain
 
-        repo sync -c -j$(nproc) --progress -v 2>&1 | stdbuf -oL tee repo-sync.log
+        TOTAL=$(repo list | wc -l)
+
+        echo "Total projects: $TOTAL"
+
+        repo sync \
+          -c \
+          -j$(nproc) \
+          --force-sync \
+          --no-clone-bundle \
+          --verbose 2>&1 | while read line
+        do
+          echo "$line"
+
+          if echo "$line" | grep -q "Fetching project"; then
+            COUNT=$((COUNT+1))
+            PERCENT=$((COUNT*100/TOTAL))
+
+            echo "SYNC: $PERCENT% ($COUNT/$TOTAL)"
+          fi
+        done
+
+        echo "SYNC: 100%"
 
     - name: Setup ARM64 prebuilts
       run: |
