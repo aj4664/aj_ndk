@@ -78,23 +78,8 @@ index c2f17aa..52c682b 100644
  
      @property
      def cflags(self) -> List[str]:
-diff --git a/src/llvm_android/hosts.py b/src/llvm_android/hosts.py
-index 113cfe3..268dafe 100644
---- a/src/llvm_android/hosts.py
-+++ b/src/llvm_android/hosts.py
-@@ -99,8 +99,8 @@ class Arch(enum.Enum):
-         return {
-             Arch.AARCH64: 'arm64',
-             Arch.ARM:  'arm',
--            Arch.X86_64: 'x86',
--            Arch.I386: 'x86',
-+            Arch.X86_64: 'arm64',
-+            Arch.I386: 'arm64',
-         }[self]
- 
- 
 diff --git a/src/llvm_android/paths.py b/src/llvm_android/paths.py
-index 1c75402..329081a 100644
+index 1c75402..dbf7cee 100644
 --- a/src/llvm_android/paths.py
 +++ b/src/llvm_android/paths.py
 @@ -35,8 +35,8 @@ TOOLCHAIN_DIR: Path = ANDROID_DIR / 'toolchain'
@@ -119,6 +104,18 @@ index 1c75402..329081a 100644
  LIBNCURSES_SRC_DIR: Path = EXTERNAL_DIR / 'libncurses'
 @@ -131,11 +131,11 @@ def get_package_install_path(host: hosts.Host, arch: hosts.Arch, package_name) -
  
+ def get_python_dir(host: hosts.Host, arch: hosts.Arch) -> Path:
+     """Returns the path to python for a host."""
+-    return PREBUILTS_DIR / 'python' / hosts.tag(host, arch)
++    return PREBUILTS_DIR / 'python' / 'linux-arm64'
+ 
+ 
+ def determine_python_ver() -> str:
+-    python_path = get_python_dir(hosts.Host.Linux, hosts.Arch.X86_64)
++    python_path = get_python_dir(hosts.Host.Linux, hosts.Arch.AARCH64)
+     versions = list(python_path.glob("include/python*"))
+     if len(versions) != 1:
+         raise RuntimeError(
  def get_python_dir(host: hosts.Host, arch: hosts.Arch) -> Path:
      """Returns the path to python for a host."""
 -    return PREBUILTS_DIR / 'python' / hosts.tag(host, arch)
