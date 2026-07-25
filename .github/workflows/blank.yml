@@ -30,8 +30,9 @@ jobs:
           libc++-dev \
           libc++abi-dev \
           libstdc++-12-dev \
-          libc6-dev-i386 \
-          gcc-multilib \
+          libc6-dev \
+          libc6-dev-amd64-cross \
+          libc6-dev-i386-cross \
           zlib1g-dev \
           libxml2-dev \
           libedit-dev \
