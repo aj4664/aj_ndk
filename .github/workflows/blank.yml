@@ -48,29 +48,20 @@ jobs:
         print(platform.machine())
         EOF
         
-    - name: Cache AOSP LLVM
+    - name: Restore AOSP source cache
       uses: actions/cache@v4
       with:
         path: |
           ~/aosp-llvm
-        key: aosp-llvm-${{ runner.arch }}-v1
+        key: aosp-source-arm64-v1
         restore-keys: |
-          aosp-llvm-${{ runner.arch }}-
+          aosp-source-arm64-
 
-    - name: Sync AOSP LLVM
+    - name: Check AOSP source
       run: |
-        mkdir -p ~/aosp-llvm
         cd ~/aosp-llvm
-
-        repo init \
-          -u https://android.googlesource.com/platform/manifest \
-          -b llvm-toolchain
-
-        repo sync \
-          -c \
-          -j$(nproc) \
-          --force-sync \
-          --no-clone-bundle
+        ls -la
+        ls -la toolchain
 
     - name: Setup ARM64 prebuilts
       run: |
