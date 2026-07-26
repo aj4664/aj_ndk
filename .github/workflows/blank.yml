@@ -104,6 +104,9 @@ jobs:
 
     - name: Build LLVM
       run: |
+      
+        rm -rf ~/aosp-llvm/out
+
         cd ~/aosp-llvm
 
         python3 toolchain/llvm_android/build.py \
