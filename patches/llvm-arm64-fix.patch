@@ -1,7 +1,16 @@
 diff --git a/do_build.py b/do_build.py
-index 43488db..f31de51 100755
+index 43488db..adc96d6 100755
 --- a/do_build.py
 +++ b/do_build.py
+@@ -200,7 +200,7 @@ def build_runtimes(build_lldb_server: bool,
+     if hosts.build_host().is_linux:
+         add_lib_links(stage, host_32bit_config)
+         add_header_links(stage, host_config)
+-        builders.MuslHostRuntimeBuilder().build()
++#        builders.MuslHostRuntimeBuilder().build()
+     builders.LibOMPBuilder().build()
+     if build_lldb_server:
+         builders.LldbServerBuilder().build()
 @@ -1110,6 +1110,7 @@ def main():
      libzstd_builder = builders.ZstdBuilder(host_configs)
      libzstd_builder.build()
