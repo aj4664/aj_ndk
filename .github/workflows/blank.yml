@@ -44,7 +44,6 @@ jobs:
           libncurses-dev \
           liblzma-dev \
           libssl-dev
- 
 
         sudo ln -sf /usr/bin/python /usr/bin/python3.11
         sudo ln -sf /usr/lib/aarch64-linux-gnu/libpython3.so /usr/lib/libpython3.so
