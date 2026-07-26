@@ -43,17 +43,21 @@ jobs:
           cmake \
           ninja-build \
           bison \
-          llvm \
-          lld \
           flex \
+          lld \
+          llvm \
+          clang \
+          libc++-dev \
+          libc++abi-dev \
+          libstdc++-12-dev \
           libc6-dev \
+          libc6-dev-amd64-cross \
+          libc6-dev-i386-cross \
           zlib1g-dev \
           libxml2-dev \
           libedit-dev \
           libncurses-dev \
           liblzma-dev \
-          g++ \
-          libstdc++-14-dev \
           libssl-dev
 
         sudo ln -sf /usr/bin/python /usr/bin/python3.11
