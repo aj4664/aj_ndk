@@ -1,0 +1,132 @@
+diff --git a/do_build.py b/do_build.py
+index 43488db..f31de51 100755
+--- a/do_build.py
++++ b/do_build.py
+@@ -1110,6 +1110,7 @@ def main():
+     libzstd_builder = builders.ZstdBuilder(host_configs)
+     libzstd_builder.build()
+ 
++    """
+     if not args.bootstrap_use_prebuilt and not args.bootstrap_use:
+         stage1 = builders.Stage1Builder(host_configs)
+         stage1.build_name = 'stage1'
+@@ -1150,6 +1151,8 @@ def main():
+         with timer.Timer('package_bootstrap'):
+             utils.create_tarball(paths.OUT_DIR, ['stage1', 'stage1-install'], paths.DIST_DIR / 'stage1-install.tar.xz')
+         return
++    """
++    set_default_toolchain(toolchains.Toolchain(Path("/usr"),Path("/usr")))
+ 
+     if build_lldb:
+         # Swig is needed for both host and windows lldb.
+@@ -1177,16 +1180,16 @@ def main():
+         stage2.libzstd = libzstd_builder
+ 
+         libxml2_builder = builders.LibXml2Builder(host_configs)
+-        libxml2_builder.build()
+-        stage2.libxml2 = libxml2_builder
++#        libxml2_builder.build()
++#        stage2.libxml2 = libxml2_builder
+ 
+         stage2.build_lldb = build_lldb
+         if build_lldb:
+             stage2.swig_executable = swig_builder.install_dir / 'bin' / 'swig'
+ 
+             xz_builder = builders.XzBuilder(host_configs)
+-            xz_builder.build()
+-            stage2.liblzma = xz_builder
++#            xz_builder.build()
++#            stage2.liblzma = xz_builder
+ 
+             libncurses = builders.LibNcursesBuilder(host_configs)
+             libncurses.build()
+diff --git a/src/llvm_android/base_builders.py b/src/llvm_android/base_builders.py
+index 6f45213..efd3768 100644
+--- a/src/llvm_android/base_builders.py
++++ b/src/llvm_android/base_builders.py
+@@ -851,8 +851,7 @@ class LLVMBuilder(LLVMBaseBuilder):
+                 ]
+                 if not self._config.is_musl:
+                     runtime_configs += [
+-                        self._config,
+-                        configs.LinuxConfig(is_32_bit=True),
++                        self._config,                
+                     ]
+             else:
+                 runtime_configs = [self._config]
+diff --git a/src/llvm_android/builders.py b/src/llvm_android/builders.py
+index a42978e..cafd3db 100644
+--- a/src/llvm_android/builders.py
++++ b/src/llvm_android/builders.py
+@@ -235,6 +235,8 @@ class Stage2Builder(base_builders.LLVMBuilder):
+ 
+         if self.debug_build:
+             defines['CMAKE_BUILD_TYPE'] = 'Debug'
++        else:
++            defines['CMAKE_BUILD_TYPE'] = 'Release'
+ 
+         if self.build_instrumented:
+             defines['LLVM_BUILD_INSTRUMENTED'] = 'ON'
+diff --git a/src/llvm_android/configs.py b/src/llvm_android/configs.py
+index c2f17aa..52c682b 100644
+--- a/src/llvm_android/configs.py
++++ b/src/llvm_android/configs.py
+@@ -292,16 +292,16 @@ class LinuxConfig(_GccConfig):
+     """Configuration for Linux targets."""
+ 
+     target_os: hosts.Host = hosts.Host.Linux
+-    sysroot: Optional[Path] = paths.GCC_ROOT / 'host' / 'x86_64-linux-glibc2.17-4.8' / 'sysroot'
+-    gcc_root: Path = paths.GCC_ROOT / 'host' / 'x86_64-linux-glibc2.17-4.8'
+-    gcc_triple: str = 'x86_64-linux'
++    sysroot: Optional[Path] = Path('/')
++    gcc_root: Path = Path('/')
++    gcc_triple: str = 'aarch64-linux'
+     gcc_ver: str = '4.8.3'
+     is_cross_compiling: bool = False
+     is_musl: bool = False
+ 
+     @property
+     def llvm_triple(self) -> str:
+-        return 'i386-unknown-linux-gnu' if self.is_32_bit else 'x86_64-unknown-linux-gnu'
++        return 'i386-unknown-linux-gnu' if self.is_32_bit else 'aarch64-unknown-linux-gnu'
+ 
+     @property
+     def cflags(self) -> List[str]:
+diff --git a/src/llvm_android/paths.py b/src/llvm_android/paths.py
+index 1c75402..dbf7cee 100644
+--- a/src/llvm_android/paths.py
++++ b/src/llvm_android/paths.py
+@@ -35,8 +35,8 @@ TOOLCHAIN_DIR: Path = ANDROID_DIR / 'toolchain'
+ TOOLCHAIN_UTILS_DIR: Path = EXTERNAL_DIR / 'toolchain-utils'
+ TOOLCHAIN_LLVM_PATH: Path = TOOLCHAIN_DIR / 'llvm-project'
+ 
+-CLANG_PREBUILT_DIR: Path = (PREBUILTS_DIR / 'clang' / 'host' / hosts.build_tag()
+-                            / constants.CLANG_PREBUILT_VERSION)
++CLANG_PREBUILT_DIR: Path = (PREBUILTS_DIR / 'clang' / 'host' / hosts.build_tag())
++
+ CLANG_PREBUILT_LIBCXX_HEADERS: Path = CLANG_PREBUILT_DIR / 'include' / 'c++' / 'v1'
+ WINDOWS_CLANG_PREBUILT_DIR: Path = (PREBUILTS_DIR / 'clang' / 'host' / 'windows-x86'
+                                     / constants.CLANG_PREBUILT_VERSION)
+@@ -54,7 +54,7 @@ BISON_BIN_PATH: Path = BUILD_TOOLS_DIR / hosts.build_tag() / 'bin' / 'bison'
+ BISON_PKGDATA_PATH: Path = BUILD_TOOLS_DIR/ 'common' / 'bison'
+ M4_BIN_PATH: Path = BUILD_TOOLS_DIR / hosts.build_tag() / 'bin' / 'm4'
+ MAKE_BIN_PATH: Path = BUILD_TOOLS_DIR / hosts.build_tag() / 'bin' / 'make'
+-NINJA_BIN_PATH: Path = PREBUILTS_DIR / 'ninja' / hosts.build_tag() / 'ninja'
++NINJA_BIN_PATH: Path = BUILD_TOOLS_DIR / hosts.build_tag() / 'bin' / 'ninja'
+ 
+ LIBEDIT_SRC_DIR: Path = EXTERNAL_DIR / 'libedit'
+ LIBNCURSES_SRC_DIR: Path = EXTERNAL_DIR / 'libncurses'
+@@ -131,11 +131,11 @@ def get_package_install_path(host: hosts.Host, arch: hosts.Arch, package_name) -
+ 
+ def get_python_dir(host: hosts.Host, arch: hosts.Arch) -> Path:
+     """Returns the path to python for a host."""
+-    return PREBUILTS_DIR / 'python' / hosts.tag(host, arch)
++    return PREBUILTS_DIR / 'python' / 'linux-arm64'
+ 
+ 
+ def determine_python_ver() -> str:
+-    python_path = get_python_dir(hosts.Host.Linux, hosts.Arch.X86_64)
++    python_path = get_python_dir(hosts.Host.Linux, hosts.Arch.AARCH64)
+     versions = list(python_path.glob("include/python*"))
+     if len(versions) != 1:
+         raise RuntimeError(
