@@ -51,7 +51,7 @@ jobs:
           libxml2-dev \
           libedit-dev \
           libncurses-dev \
-          liblzma-dev \          
+          liblzma-dev \
           g++ \
           libstdc++-14-dev \
           libssl-dev
