@@ -98,7 +98,7 @@ jobs:
 
         cp $GITHUB_WORKSPACE/patches/llvm-arm64-fix.patch .
 
-        git apply llvm-arm64-fix.patch
+        git apply dyb.patch
 
         echo "ARM64 patch applied"
 
