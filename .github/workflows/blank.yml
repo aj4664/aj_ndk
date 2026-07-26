@@ -33,13 +33,9 @@ jobs:
           build-essential \
           cmake \
           ninja-build \
-          bison \
-          
-          llvm \
-          
+          bison \         
+          llvm \        
           lld \
-
-
           flex \
           libc6-dev \
           zlib1g-dev \
