@@ -41,16 +41,22 @@ index 43488db..f31de51 100755
              libncurses = builders.LibNcursesBuilder(host_configs)
              libncurses.build()
 diff --git a/src/llvm_android/base_builders.py b/src/llvm_android/base_builders.py
-index 6f45213..efd3768 100644
+index 6f45213..696ff71 100644
 --- a/src/llvm_android/base_builders.py
 +++ b/src/llvm_android/base_builders.py
-@@ -851,8 +851,7 @@ class LLVMBuilder(LLVMBaseBuilder):
+@@ -844,15 +844,11 @@ class LLVMBuilder(LLVMBaseBuilder):
+                 # MuslHostRuntimeBuilder, which is enabled for both the glibc
+                 # and musl builds of LLVM.
+                 runtime_configs = [
+-                    configs.LinuxMuslHostConfig(hosts.Arch.ARM),
+                     configs.LinuxMuslHostConfig(hosts.Arch.AARCH64),
+-                    configs.LinuxMuslHostConfig(hosts.Arch.I386),
+-                    configs.LinuxMuslHostConfig(hosts.Arch.X86_64),
                  ]
                  if not self._config.is_musl:
                      runtime_configs += [
--                        self._config,
+                         self._config,
 -                        configs.LinuxConfig(is_32_bit=True),
-+                        self._config,                
                      ]
              else:
                  runtime_configs = [self._config]
