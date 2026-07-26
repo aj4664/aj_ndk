@@ -34,6 +34,12 @@ jobs:
           cmake \
           ninja-build \
           bison \
+          
+          llvm \
+          
+          lld \
+
+
           flex \
           libc6-dev \
           zlib1g-dev \
@@ -102,7 +108,7 @@ jobs:
         git apply dyb.patch
 
         echo "ARM64 patch applied"
-        find ~/aosp-llvm -name .git -type d -prune -exec rm -rf {} +
+       
        
 
     - name: Build LLVM
@@ -116,7 +122,9 @@ jobs:
           --no-build windows \
           --skip-tests \
           --no-musl
-
+          
+          
+          find ~/aosp-llvm -name .git -type d -prune -exec rm -rf {} +
     - name: Pack output
       run: |
         cd ~/aosp-llvm
