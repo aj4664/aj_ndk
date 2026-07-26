@@ -35,9 +35,6 @@ jobs:
           ninja-build \
           bison \
           flex \
-          libc++-dev \
-          libc++abi-dev \
-          libstdc++-12-dev \
           libc6-dev \
           zlib1g-dev \
           libxml2-dev \
@@ -66,6 +63,10 @@ jobs:
           -b llvm-toolchain
 
         repo sync -c -j$(nproc)
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /usr/local/lib/android
+        df -h
+
 
     - name: Setup ARM64 prebuilts
       run: |
