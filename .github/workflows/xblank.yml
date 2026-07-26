@@ -1,0 +1,156 @@
+name: Build LLVM ARM64
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04-arm
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Free disk space
+      run: |
+        sudo rm -rf /usr/local/lib/android
+        sudo rm -rf /opt/ghc
+        sudo rm -rf /usr/local/share/powershell
+        sudo rm -rf /usr/local/share/chromium
+        sudo rm -rf /usr/share/dotnet
+
+        sudo rm -rf /usr/local/share/boost
+        sudo rm -rf /usr/local/share/vcpkg
+        sudo rm -rf /usr/local/share/edge
+        sudo rm -rf /usr/local/julia*
+        sudo rm -rf /usr/local/share/gradle
+
+        sudo apt clean
+        sudo rm -rf /var/lib/apt/lists/*
+
+        df -h
+
+
+    - name: Install deps
+      run: |
+        sudo apt update
+        sudo apt install -y \
+          git \
+          repo \
+          python3 \
+          python3-pip \
+          build-essential \
+          cmake \
+          ninja-build \
+          bison \
+          flex \
+          lld \
+          llvm \
+          clang \
+          libc++-dev \
+          libc++abi-dev \
+          libstdc++-12-dev \
+          libc6-dev \
+          libc6-dev-amd64-cross \
+          libc6-dev-i386-cross \
+          zlib1g-dev \
+          libxml2-dev \
+          libedit-dev \
+          libncurses-dev \
+          liblzma-dev \
+          libssl-dev
+
+        sudo ln -sf /usr/bin/python /usr/bin/python3.11
+        sudo ln -sf /usr/lib/aarch64-linux-gnu/libpython3.so /usr/lib/libpython3.so
+        sudo ln -sf /usr/lib/aarch64-linux-gnu/libpython3.12.so /usr/lib/libpython3.12.so
+        sudo ln -sf /usr/lib/aarch64-linux-gnu/libpython3.12.so.1.0 /usr/lib/libpython3.12.so.1.0
+
+        python3.11 --version
+
+
+    - name: Sync AOSP LLVM
+      run: |
+        mkdir ~/aosp-llvm
+        cd ~/aosp-llvm
+
+        repo init \
+          -u https://android.googlesource.com/platform/manifest \
+          -b llvm-toolchain \
+          --depth=1 \
+          --no-clone-bundle \
+          --no-repo-verify
+
+        repo sync \
+          -c \
+          --force-sync \
+          --no-clone-bundle \
+          --no-tags \
+          --optimized-fetch \
+          --prune \
+          -j$(nproc)
+
+          rm -rf ~/.cache
+          rm -rf ~/.repo_client
+
+
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /usr/local/lib/android
+        sudo rm -rf /opt/ghc
+        sudo rm -rf /usr/local/share/powershell
+        sudo rm -rf /usr/local/share/chromium
+        df -h
+        
+    - name: Setup ARM64 prebuilts
+      run: |
+        cd ~/aosp-llvm
+
+        mkdir -p prebuilts/build-tools/linux-arm64/bin
+
+        ln -sf /usr/bin/ninja prebuilts/build-tools/linux-arm64/bin/ninja
+        ln -sf /usr/bin/bison prebuilts/build-tools/linux-arm64/bin/bison
+        ln -sf /usr/bin/make prebuilts/build-tools/linux-arm64/bin/make
+
+        mkdir -p prebuilts/clang/host
+        ln -sfn /usr prebuilts/clang/host/linux-arm64
+
+        mkdir -p prebuilts/cmake
+        ln -sfn /usr prebuilts/cmake/linux-arm64
+
+        mkdir -p prebuilts/python
+        ln -sfn /usr prebuilts/python/linux-arm64
+
+    - name: Apply ARM64 patch
+      run: |
+        cd ~/aosp-llvm/toolchain/llvm_android
+
+        cp $GITHUB_WORKSPACE/patches/llvm-arm64-fix.patch .
+
+        git apply llvm-arm64-fix.patch
+
+        echo "ARM64 patch applied"
+        
+    - name: Build LLVM
+      run: |
+      
+        rm -rf ~/aosp-llvm/out
+
+        cd ~/aosp-llvm
+
+        python3 toolchain/llvm_android/build.py \
+          --no-build windows \
+          --skip-tests \
+          --no-musl
+          
+          
+          find ~/aosp-llvm -name .git -type d -prune -exec rm -rf {} +
+    - name: Pack output
+      run: |
+        cd ~/aosp-llvm
+
+        tar -czf llvm-arm64.tar.gz out/
+
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: llvm-arm64
+        path: ~/aosp-llvm/llvm-arm64.tar.gz
