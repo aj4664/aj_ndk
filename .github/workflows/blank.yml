@@ -11,6 +11,17 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
+
+    - name: Free disk space
+      run: |
+        sudo rm -rf /usr/local/lib/android
+        sudo rm -rf /opt/ghc
+        sudo rm -rf /usr/local/share/powershell
+        sudo rm -rf /usr/local/share/chromium
+        sudo rm -rf /usr/share/dotnet
+        df -h
+
+
     - name: Install deps
       run: |
         sudo apt update
@@ -24,15 +35,10 @@ jobs:
           ninja-build \
           bison \
           flex \
-          lld \
-          llvm \
-          clang \
           libc++-dev \
           libc++abi-dev \
           libstdc++-12-dev \
           libc6-dev \
-          libc6-dev-amd64-cross \
-          libc6-dev-i386-cross \
           zlib1g-dev \
           libxml2-dev \
           libedit-dev \
@@ -50,28 +56,16 @@ jobs:
         python3.11 --version
 
 
-    - name: Check arch
+    - name: Sync AOSP LLVM
       run: |
-        uname -m
-        python3 - <<EOF
-        import platform
-        print(platform.machine())
-        EOF
-        
-    - name: Restore AOSP source cache
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/aosp-llvm
-        key: aosp-source-arm64-v1
-        restore-keys: |
-          aosp-source-arm64-
-
-    - name: Check AOSP source
-      run: |
+        mkdir ~/aosp-llvm
         cd ~/aosp-llvm
-        ls -la
-        ls -la toolchain
+
+        repo init \
+          -u https://android.googlesource.com/platform/manifest \
+          -b llvm-toolchain
+
+        repo sync -c -j$(nproc)
 
     - name: Setup ARM64 prebuilts
       run: |
