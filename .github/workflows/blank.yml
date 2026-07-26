@@ -62,9 +62,18 @@ jobs:
         repo init \
           -u https://android.googlesource.com/platform/manifest \
           -b llvm-toolchain \
-          --depth=1
+          --depth=1 \
+          --no-clone-bundle \
+          --no-repo-verify
 
-        repo sync -c -j$(nproc)
+        repo sync \
+          -c \
+          --force-sync \
+          --no-clone-bundle \
+          --no-tags \
+          --optimized-fetch \
+          --prune \
+          -j$(nproc)
         
 
         sudo rm -rf /usr/share/dotnet
