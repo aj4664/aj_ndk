@@ -96,7 +96,7 @@ jobs:
       run: |
         cd ~/aosp-llvm/toolchain/llvm_android
 
-        cp $GITHUB_WORKSPACE/patches/llvm-arm64-fix.patch .
+        cp $GITHUB_WORKSPACE/patches/dyb.patch .
 
         git apply dyb.patch
 
