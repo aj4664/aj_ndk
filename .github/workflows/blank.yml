@@ -102,9 +102,9 @@ jobs:
 
         echo "ARM64 patch applied"
 
-
     - name: Build LLVM
       run: |
+      
         rm -rf ~/aosp-llvm/out
 
         cd ~/aosp-llvm
@@ -112,8 +112,7 @@ jobs:
         python3 toolchain/llvm_android/build.py \
           --no-build windows \
           --skip-tests \
-          --no-musl \
-          --cmake-arg=-DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON
+          --no-musl
 
     - name: Pack output
       run: |
