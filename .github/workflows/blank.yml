@@ -58,6 +58,7 @@ jobs:
           libedit-dev \
           libncurses-dev \
           liblzma-dev \
+          golang-go \
           libssl-dev
 
         sudo ln -sf /usr/bin/python /usr/bin/python3.11
@@ -118,6 +119,11 @@ jobs:
 
         mkdir -p prebuilts/python
         ln -sfn /usr prebuilts/python/linux-arm64
+
+        mkdir -p prebuilts/go
+        ln -sfn /usr prebuilts/go/linux-arm64
+
+
 
     - name: Apply ARM64 patch
       run: |
