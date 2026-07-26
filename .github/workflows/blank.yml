@@ -18,6 +18,16 @@ jobs:
         sudo rm -rf /usr/local/share/powershell
         sudo rm -rf /usr/local/share/chromium
         sudo rm -rf /usr/share/dotnet
+
+        sudo rm -rf /usr/local/share/boost
+        sudo rm -rf /usr/local/share/vcpkg
+        sudo rm -rf /usr/local/share/edge
+        sudo rm -rf /usr/local/julia*
+        sudo rm -rf /usr/local/share/gradle
+
+        sudo apt clean
+        sudo rm -rf /var/lib/apt/lists/*
+
         df -h
 
 
@@ -72,7 +82,11 @@ jobs:
           --optimized-fetch \
           --prune \
           -j$(nproc)
-        
+
+          rm -rf ~/.cache
+          rm -rf ~/.repo_client
+
+
         sudo rm -rf /usr/share/dotnet
         sudo rm -rf /usr/local/lib/android
         sudo rm -rf /opt/ghc
