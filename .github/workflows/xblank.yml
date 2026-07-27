@@ -118,6 +118,11 @@ jobs:
 
         mkdir -p prebuilts/python
         ln -sfn /usr prebuilts/python/linux-arm64
+        
+        wget https://go.dev/dl/go1.23.12.linux-arm64.tar.gz
+        tar -C /usr -xzf go1.23.12.linux-arm64.tar.gz
+        mkdir -p prebuilts/go
+        ln -sfn /usr/go prebuilts/go/linux-arm64
 
     - name: Apply ARM64 patch
       run: |
