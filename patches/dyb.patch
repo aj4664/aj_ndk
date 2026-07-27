@@ -1,8 +1,51 @@
 diff --git a/do_build.py b/do_build.py
-index 43488db..f31de51 100755
+index 43488db..2c2964f 100755
 --- a/do_build.py
 +++ b/do_build.py
-@@ -1110,6 +1110,7 @@ def main():
+@@ -200,12 +200,12 @@ def build_runtimes(build_lldb_server: bool,
+     if hosts.build_host().is_linux:
+         add_lib_links(stage, host_32bit_config)
+         add_header_links(stage, host_config)
+-        builders.MuslHostRuntimeBuilder().build()
++#        builders.MuslHostRuntimeBuilder().build()
+     builders.LibOMPBuilder().build()
+     if build_lldb_server:
+         builders.LldbServerBuilder().build()
+     builders.SanitizerMapFileBuilder().build()
+-    builders.LibSimpleperfReadElfBuilder().build()
++#    builders.LibSimpleperfReadElfBuilder().build()
+ 
+ 
+ def install_wrappers(llvm_install_path: Path, llvm_next=False) -> None:
+@@ -561,11 +561,14 @@ def package_toolchain(toolchain_builder: LLVMBuilder,
+             triple32 = 'i686-unknown-linux-musl'
+             triple64 = 'x86_64-unknown-linux-musl'
+         else:
+-            triple32 = 'i386-unknown-linux-gnu'
+-            triple64 = 'x86_64-unknown-linux-gnu'
++            triple32 = None
++            triple64 = host_config.llvm_triple
++
+         for tripleNN in (triple32, triple64):
+-            (lib_dir / tripleNN / 'libc++.so.1').symlink_to('libc++.so')
+-            (lib_dir / tripleNN / 'libc++abi.so.1').symlink_to('libc++abi.so')
++            if tripleNN:
++                (lib_dir / tripleNN / 'libc++.so.1').symlink_to('libc++.so')
++                (lib_dir / tripleNN / 'libc++abi.so.1').symlink_to('libc++abi.so')
++
+         (lib_dir / 'libc++.so.1').symlink_to(Path(triple64) / 'libc++.so.1')
+         (lib_dir / 'libc++abi.so.1').symlink_to(Path(triple64) / 'libc++abi.so.1')
+ 
+@@ -1047,7 +1050,7 @@ def main():
+ 
+     do_bolt = args.bolt and not args.debug and not args.build_instrumented
+     do_bolt_instrument = args.bolt_instrument and not args.debug and not args.build_instrumented
+-    do_runtimes = not args.skip_runtimes
++    do_runtimes = False
+     do_package = not args.skip_package
+     do_strip = not args.no_strip
+     do_strip_host_package = do_strip and not args.debug and not args.build_llvm_next
+@@ -1110,6 +1113,7 @@ def main():
      libzstd_builder = builders.ZstdBuilder(host_configs)
      libzstd_builder.build()
  
@@ -10,7 +53,7 @@ index 43488db..f31de51 100755
      if not args.bootstrap_use_prebuilt and not args.bootstrap_use:
          stage1 = builders.Stage1Builder(host_configs)
          stage1.build_name = 'stage1'
-@@ -1150,6 +1151,8 @@ def main():
+@@ -1150,6 +1154,8 @@ def main():
          with timer.Timer('package_bootstrap'):
              utils.create_tarball(paths.OUT_DIR, ['stage1', 'stage1-install'], paths.DIST_DIR / 'stage1-install.tar.xz')
          return
@@ -19,7 +62,12 @@ index 43488db..f31de51 100755
  
      if build_lldb:
          # Swig is needed for both host and windows lldb.
-@@ -1177,16 +1180,16 @@ def main():
+@@ -1173,20 +1179,20 @@ def main():
+         stage2.bolt_optimize = bolt
+         stage2.bolt_instrument = args.bolt_instrument
+         stage2.profdata_file = profdata
+-        stage2.build_cross_runtimes = hosts.build_host().is_linux
++        stage2.build_cross_runtimes = False
          stage2.libzstd = libzstd_builder
  
          libxml2_builder = builders.LibXml2Builder(host_configs)
@@ -41,16 +89,22 @@ index 43488db..f31de51 100755
              libncurses = builders.LibNcursesBuilder(host_configs)
              libncurses.build()
 diff --git a/src/llvm_android/base_builders.py b/src/llvm_android/base_builders.py
-index 6f45213..efd3768 100644
+index 6f45213..696ff71 100644
 --- a/src/llvm_android/base_builders.py
 +++ b/src/llvm_android/base_builders.py
-@@ -851,8 +851,7 @@ class LLVMBuilder(LLVMBaseBuilder):
+@@ -844,15 +844,11 @@ class LLVMBuilder(LLVMBaseBuilder):
+                 # MuslHostRuntimeBuilder, which is enabled for both the glibc
+                 # and musl builds of LLVM.
+                 runtime_configs = [
+-                    configs.LinuxMuslHostConfig(hosts.Arch.ARM),
+                     configs.LinuxMuslHostConfig(hosts.Arch.AARCH64),
+-                    configs.LinuxMuslHostConfig(hosts.Arch.I386),
+-                    configs.LinuxMuslHostConfig(hosts.Arch.X86_64),
                  ]
                  if not self._config.is_musl:
                      runtime_configs += [
--                        self._config,
+                         self._config,
 -                        configs.LinuxConfig(is_32_bit=True),
-+                        self._config,                
                      ]
              else:
                  runtime_configs = [self._config]
@@ -68,7 +122,7 @@ index a42978e..cafd3db 100644
          if self.build_instrumented:
              defines['LLVM_BUILD_INSTRUMENTED'] = 'ON'
 diff --git a/src/llvm_android/configs.py b/src/llvm_android/configs.py
-index c2f17aa..52c682b 100644
+index c2f17aa..0ae2588 100644
 --- a/src/llvm_android/configs.py
 +++ b/src/llvm_android/configs.py
 @@ -292,16 +292,16 @@ class LinuxConfig(_GccConfig):
@@ -88,7 +142,7 @@ index c2f17aa..52c682b 100644
      @property
      def llvm_triple(self) -> str:
 -        return 'i386-unknown-linux-gnu' if self.is_32_bit else 'x86_64-unknown-linux-gnu'
-+        return 'i386-unknown-linux-gnu' if self.is_32_bit else 'aarch64-unknown-linux-gnu'
++        return 'aarch64-unknown-linux-gnu'
  
      @property
      def cflags(self) -> List[str]:
@@ -130,3 +184,20 @@ index 1c75402..dbf7cee 100644
      versions = list(python_path.glob("include/python*"))
      if len(versions) != 1:
          raise RuntimeError(
+diff --git a/src/llvm_android/toolchains.py b/src/llvm_android/toolchains.py
+index cb6603a..c4e65cf 100644
+--- a/src/llvm_android/toolchains.py
++++ b/src/llvm_android/toolchains.py
+@@ -115,9 +115,10 @@ class Toolchain:
+         """Returns the paths to lib dirs."""
+         return [
+             self.path / 'lib',
++            self.path / 'lib' / 'aarch64-unknown-linux-gnu',
++            self.path / 'lib' / 'aarch64-unknown-linux-musl',
+             self.path / 'lib' / 'x86_64-unknown-linux-gnu',
+-            self.path / 'lib' / 'x86_64-unknown-linux-musl',
+-            self.path / 'lib' / 'aarch64-unknown-linux-musl'
++            self.path / 'lib' / 'x86_64-unknown-linux-musl'
+         ]
+ 
+     @property
