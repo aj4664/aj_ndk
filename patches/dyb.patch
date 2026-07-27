@@ -73,8 +73,8 @@ index 43488db..2c2964f 100755
          libxml2_builder = builders.LibXml2Builder(host_configs)
 -        libxml2_builder.build()
 -        stage2.libxml2 = libxml2_builder
-+#        libxml2_builder.build()
-+#        stage2.libxml2 = libxml2_builder
++        libxml2_builder.build()
++        stage2.libxml2 = libxml2_builder
  
          stage2.build_lldb = build_lldb
          if build_lldb:
